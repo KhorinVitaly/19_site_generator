@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Энциклопедия Devman</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+      	<h2 class="muted">
+            <a href="index.html">Энциклопедия Devman</a>
+        </h2>
+      </div>
+
+      <div class="row">
+        {% for topic in topics %}
+          <div class="col-md-5 col-sm-6">
+            <div class="Box">
+                <div class="topic-title"> {{ topic['title'] }} </div>
+                <div>
+                    <ul>
+                    {% for article in topic['articles'] %}
+                        <li>
+                            <a href="{{ article['html_source'] }}"> {{ article['title'] }}</a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <div class="footer">
+        <p>© 2017 сделано в учебных целях</p>
+      </div>
+
+    </div> <!-- /container -->
+</body></html>
