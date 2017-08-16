@@ -15,7 +15,8 @@ def make_site():
         article_md_text = load_file('articles/' + article['source'])
         article_page_text = generate_article_page(article, article_md_text, article_page_template_text)
         re_result = re.search(r'\w+.(\w+)', article['source'])
-        file_name = re_result.group(1)
+        group_index = 1
+        file_name = re_result.group(group_index)
         path_to_html = file_name + '.html'
         write_to_file(article_page_text, 'site/' + path_to_html)
         article['html_source'] = path_to_html
