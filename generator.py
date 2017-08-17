@@ -1,4 +1,4 @@
-from jinja2 import Template
+from jinja2 import Environment, select_autoescape, FileSystemLoader
 import json
 import markdown
 import re
@@ -9,20 +9,20 @@ def make_site():
     config_dict = fetch_config()
     topics = config_dict['topics']
     articles = config_dict['articles']
-    article_page_template_text = load_file('templates/article_template.html')
+
+    jinja_env = get_jinja_env()
 
     for article in articles:
-        article_md_text = load_file('articles/' + article['source'])
-        article_page_text = generate_article_page(article, article_md_text, article_page_template_text)
+        article_md = load_file('articles/' + article['source'])
+        article_html = generate_article_page(article, article_md, jinja_env)
         re_result = re.search(r'\w+.(\w+)', article['source'])
         group_index = 1
         file_name = re_result.group(group_index)
         path_to_html = file_name + '.html'
-        write_to_file(article_page_text, 'site/' + path_to_html)
+        write_to_file(article_html, 'site/' + path_to_html)
         article['html_source'] = path_to_html
 
-    index_page_template_text = load_file('templates/index_template.html')
-    index_page_text = generate_index_page(topics, articles, index_page_template_text)
+    index_page_text = generate_index_page(topics, articles, jinja_env)
     write_to_file(index_page_text, 'site/index.html')
 
 
@@ -36,15 +36,24 @@ def fetch_config():
     return json.loads(json_data)
 
 
-def generate_index_page(topics, articles, template_text):
-    index_template = Template(template_text)
+def get_jinja_env():
+    return Environment(
+        loader=FileSystemLoader('templates'),
+        autoescape=select_autoescape(
+        enabled_extensions=('html', 'xml'),
+        default_for_string=True)
+    )
+
+
+def generate_index_page(topics, articles, jinja_env):
+    index_template = jinja_env.get_template('index_template.html')
     for topic in topics:
         topic['articles'] = [x for x in articles if x['topic'] == topic['slug']]
     return index_template.render(topics=topics)
 
 
-def generate_article_page(article, article_md_text, template_text):
-    article_template = Template(template_text)
+def generate_article_page(article, article_md_text, jinja_env):
+    article_template = jinja_env.get_template('article_template.html')
     article_text = markdown.markdown(article_md_text, extensions=['codehilite'])
     return article_template.render(acticle_content=article_text, article=article)
 
@@ -55,6 +64,7 @@ def write_to_file(html_data, filepath):
 
 
 if __name__ == '__main__':
+    make_site()
     server = Server()
     server.watch('templates/', make_site)
     server.watch('articles/', make_site)
