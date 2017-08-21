@@ -3,6 +3,7 @@ import json
 import markdown
 import re
 from livereload import Server
+from os import path
 
 
 def make_site():
@@ -13,17 +14,17 @@ def make_site():
     jinja_env = get_jinja_env()
 
     for article in articles:
-        article_md = load_file('articles/' + article['source'])
+        article_md = load_file('articles' + path.sep + article['source'])
         article_html = generate_article_page(article, article_md, jinja_env)
         re_result = re.search(r'\w+.(\w+)', article['source'])
         group_index = 1
         file_name = re_result.group(group_index)
         path_to_html = file_name + '.html'
-        write_to_file(article_html, 'site/' + path_to_html)
+        write_to_file(article_html, 'site' + path.sep + path_to_html)
         article['html_source'] = path_to_html
 
     index_page_text = generate_index_page(topics, articles, jinja_env)
-    write_to_file(index_page_text, 'site/index.html')
+    write_to_file(index_page_text, 'site' + path.sep + 'index.html')
 
 
 def load_file(filepath):
@@ -66,6 +67,6 @@ def write_to_file(html_data, filepath):
 if __name__ == '__main__':
     make_site()
     server = Server()
-    server.watch('templates/', make_site)
-    server.watch('articles/', make_site)
-    server.serve(root='site/')
+    server.watch('templates' + path.sep, make_site)
+    server.watch('articles' + path.sep, make_site)
+    server.serve(root='site' + path.sep)
